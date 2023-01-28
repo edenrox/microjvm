@@ -2,6 +2,8 @@ package com.hopkins.vm1;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import java.beans.Transient;
+
 import org.junit.Test;
 
 import com.hopkins.vm1.OpCode;
@@ -207,4 +209,26 @@ public class VirtualMachineTest {
 
         assertThat(result).asList().containsExactly(1, 2).inOrder();
     }
+
+    @Test
+    public void istore() {
+        Code code = 
+            new Code.Builder()
+                .append(OpCode.BI_PUSH, 14)
+                .append(OpCode.ISTORE_0)
+                .append(OpCode.ICONST_1)
+                .append(OpCode.ISTORE_1)
+                .append(OpCode.ICONST_2)
+                .append(OpCode.ISTORE_2)
+                .append(OpCode.ILOAD_2)
+                .append(OpCode.ILOAD_1)
+                .append(OpCode.ILOAD_0)
+                .append(OpCode.HALT)
+                .build();
+                VirtualMachine vm = new VirtualMachine();
+        int[] result = vm.execute(code);
+
+        assertThat(result).asList().containsExactly(2, 1, 14).inOrder();
+    }
+
 }
