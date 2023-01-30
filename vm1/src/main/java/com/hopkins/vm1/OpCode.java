@@ -10,6 +10,8 @@ public enum OpCode {
     ICONST_3(0x06),
     ICONST_4(0x07),
     ICONST_5(0x08),
+    LDC(0x12, 1),
+    LDC_W(0x13, 2),
 
     // Conversions
     I2B(0x91),
@@ -26,6 +28,15 @@ public enum OpCode {
     ISTORE_1(0x3c),
     ISTORE_2(0x3d),
     ISTORE_3(0x3e),
+
+    // Arrays
+    ARRAYLENGTH(0xbe),
+    ANEWARRAY(0xbd, 2),
+    BALOAD(0x33),
+    BASTORE(0x54),
+    IALOAD(0x2e),
+    IASTORE(0x4f),
+    NEWARRAY(0xbc, 1),
 
     // Arithmatic
     IADD(0x60),

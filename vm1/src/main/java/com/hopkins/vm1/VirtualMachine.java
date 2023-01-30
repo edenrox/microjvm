@@ -1,13 +1,25 @@
 package com.hopkins.vm1;
 
+import com.hopkins.vm1.constantpool.Constant;
+import com.hopkins.vm1.constantpool.ConstantPool;
+import com.hopkins.vm1.heap.Heap;
+import com.hopkins.vm1.heap.HeapArray;
+import com.hopkins.vm1.heap.HeapIntArray;
+import com.hopkins.vm1.heap.HeapObject;
 import java.util.Arrays;
 
 public final class VirtualMachine {
+    private static final int ARRAY_TYPE_BOOLEAN = 4;
+    private static final int ARRAY_TYPE_BYTE = 6;
+    private static final int ARRAY_TYPE_INT = 10;
     
     public int[] execute(Code code) {
+
         int[] stack = new int[4096];
         int[] locals = new int[255];
+        Heap heap = new Heap();
 
+        ConstantPool constantPool = code.constantPool;
         byte[] buffer = code.code;
         boolean isDone = false;
         int pc = 0;
@@ -40,6 +52,16 @@ public final class VirtualMachine {
                 case ICONST_5:
                     stack[sp++] = opCode.getValue() - OpCode.ICONST_M1.getValue() - 1;
                     break;
+                case LDC:
+                case LDC_W: {
+                    int index = opCode == OpCode.LDC ? arg0 : argS0;
+                    Constant constant = constantPool.get(index);
+                    if (constant.getType() == Constant.Type.INTEGER) {
+                        stack[sp++] = ((Integer) constant.getValue()).intValue();
+                    } 
+                    break;
+                }
+
 
                 // Conversions
                 case I2B:
@@ -71,6 +93,40 @@ public final class VirtualMachine {
                     locals[temp] = stack[--sp];
                     break;
 
+                // Arrays
+                case ARRAYLENGTH: {
+                    HeapObject object = heap.get(stack[sp - 1]);
+                    stack[sp - 1] = ((HeapArray) object).length();
+                    break;
+                }
+                case NEWARRAY:
+                    if (arg0 == ARRAY_TYPE_BOOLEAN || arg0 == ARRAY_TYPE_BYTE) {
+                        // boolean array
+                        HeapObject object = heap.newByteArray(stack[sp - 1]);
+                        stack[sp - 1] = object.getId();
+                    } else if (arg0 == ARRAY_TYPE_INT) {
+                        HeapObject object = heap.newIntArray(stack[sp - 1]);
+                        stack[sp - 1] = object.getId();
+                    } else {
+                        throw new IllegalArgumentException("Unexpected array type: " + stack[sp - 1]);
+                    }
+                    break;
+                case IALOAD: {
+                    HeapObject object = heap.get(stack[sp - 1]);
+                    int index = stack[sp - 2];
+                    sp--;
+                    stack[sp - 1] = ((HeapIntArray) object).get(index);
+                    break;
+                }
+                case IASTORE: {
+                    HeapObject object = heap.get(stack[sp - 1]);
+                    int index = stack[sp - 2];
+                    int value = stack[sp - 3];
+                    sp -= 3;
+                    ((HeapIntArray) object).set(index, value);
+                    break;
+                }
+                
                 // Arithmatic
                 case IADD:
                     temp = stack[sp - 2] + stack[sp - 1];
@@ -152,6 +208,28 @@ public final class VirtualMachine {
                     }
                     sp -= 2;
                     break;
+                case IFNULL:
+                    if (stack[sp--] == 0) {
+                        pc += argS0 - 2;
+                    }
+                    break;
+                case IFNONNULL:
+                    if (stack[sp--] != 0) {
+                        pc -= argS0 - 2;
+                    }
+                    break;
+                case IFEQ:
+                    if (stack[sp--] == 0) {
+                        pc += argS0 - 2;
+                    }
+                    break;
+                case IFNE:
+                    if (stack[sp--] != 0) {
+                        pc += argS0 - 2;
+                    }
+                    break;
+                    
+
                 
                 // Stack Manipulation
                 case BI_PUSH:

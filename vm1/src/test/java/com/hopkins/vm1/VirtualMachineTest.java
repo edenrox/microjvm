@@ -2,12 +2,12 @@ package com.hopkins.vm1;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import java.beans.Transient;
-
-import org.junit.Test;
-
+import java.util.Arrays;
+import com.hopkins.vm1.constantpool.Constant;
+import com.hopkins.vm1.constantpool.ConstantPool;
 import com.hopkins.vm1.OpCode;
 import com.hopkins.vm1.VirtualMachine;
+import org.junit.Test;
 
 public class VirtualMachineTest {
     @Test
@@ -229,6 +229,80 @@ public class VirtualMachineTest {
         int[] result = vm.execute(code);
 
         assertThat(result).asList().containsExactly(2, 1, 14).inOrder();
+    }
+
+    @Test
+    public void ldc() {
+
+        ConstantPool constantPool =
+            new ConstantPool(Arrays.asList(Constant.of(10000), Constant.of(-21786), Constant.of(40)));
+        Code code = 
+            new Code.Builder()
+                .constantPool(constantPool)
+                .append(OpCode.LDC, 0)
+                .append(OpCode.LDC, 1)
+                .appendS(OpCode.LDC_W, 2)
+                .append(OpCode.HALT)
+                .build();
+                VirtualMachine vm = new VirtualMachine();
+        int[] result = vm.execute(code);
+
+        assertThat(result).asList().containsExactly(10000, -21786, 40).inOrder();
+    }
+
+    @Test
+    public void newarray() {
+        Code code = 
+            new Code.Builder()
+                .append(OpCode.BI_PUSH, 10)
+                .append(OpCode.NEWARRAY, 6)
+                .append(OpCode.BI_PUSH, 4)
+                .append(OpCode.NEWARRAY, 10)
+                .append(OpCode.HALT)
+                .build();
+                VirtualMachine vm = new VirtualMachine();
+        int[] result = vm.execute(code);
+
+        assertThat(result).asList().containsExactly(1, 2).inOrder();
+    }
+
+    @Test
+    public void arraylength() {
+        Code code = 
+            new Code.Builder()
+                .append(OpCode.BI_PUSH, 15)
+                .append(OpCode.NEWARRAY, 6)
+                .append(OpCode.ARRAYLENGTH)
+                .append(OpCode.HALT)
+                .build();
+                VirtualMachine vm = new VirtualMachine();
+        int[] result = vm.execute(code);
+
+        assertThat(result).asList().containsExactly(15).inOrder();
+    }
+
+    @Test
+    public void iastore() {
+        Code code = 
+            new Code.Builder()
+                .append(OpCode.ICONST_5)
+                .append(OpCode.NEWARRAY, 10)
+                .append(OpCode.BI_PUSH, 11)
+                
+                .append(OpCode.ICONST_2)
+                .append(OpCode.DUP_X2)
+                
+                .append(OpCode.IASTORE)
+                
+                .append(OpCode.ICONST_2)
+                .append(OpCode.DUP_X1)
+                .append(OpCode.IALOAD) /**/
+                .append(OpCode.HALT)
+                .build();
+                VirtualMachine vm = new VirtualMachine();
+        int[] result = vm.execute(code);
+
+        assertThat(result).asList().containsExactly(1, 11).inOrder();
     }
 
 }
