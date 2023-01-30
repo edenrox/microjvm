@@ -1,6 +1,6 @@
 package alt.java.lang;
 
-public abstract class ClassLoader2 {
+public abstract class ClassLoader2 extends Object2 {
 
     protected ClassLoader2() {}
 

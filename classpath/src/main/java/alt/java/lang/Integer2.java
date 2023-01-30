@@ -1,6 +1,6 @@
 package alt.java.lang;
 
-public final class Integer2 {
+public final class Integer2 extends Object2 {
     public static final int MAX_VALUE = 0x7fffffff;
     public static final int MIN_VALUE = 0x80000000;
 

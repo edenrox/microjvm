@@ -5,7 +5,7 @@ package alt.java.lang;
  * 
  * All methods are static and implemented in native code.
  */
-public final class System2 {
+public final class System2 extends Object2 {
     public static native final void arraycopy(Object src, int srcOffset, Object dest, int destOffset, int length);
 
     public static native final void gc();
