@@ -18,9 +18,9 @@ public class Integer2Test {
     
     @Test
     public void valueOf_returnsCachedValues() {
-        assertThat(Integer2.valueOf(12)).isSameAs(Integer2.valueOf(12));
-        assertThat(Integer2.valueOf(0)).isSameAs(Integer2.valueOf(0));
-        assertThat(Integer2.valueOf(500)).isNotSameAs(Integer2.valueOf(500));
+        assertThat(Integer2.valueOf(12)).isSameInstanceAs(Integer2.valueOf(12));
+        assertThat(Integer2.valueOf(0)).isSameInstanceAs(Integer2.valueOf(0));
+        assertThat(Integer2.valueOf(500)).isNotSameInstanceAs(Integer2.valueOf(500));
     }
 
     @Test
